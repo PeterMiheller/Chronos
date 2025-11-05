@@ -44,6 +44,10 @@ public class VacationRequest {
         return employee;
     }
 
+    public Admin getAdmin() {
+        return admin;
+    }
+
     public VacationStatus getStatus() {
         return status;
     }
@@ -66,6 +70,10 @@ public class VacationRequest {
 
     public void setEmployee(Employee employee) {
         this.employee = employee;
+    }
+
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
     }
 
     public void setStatus(VacationStatus status) {
