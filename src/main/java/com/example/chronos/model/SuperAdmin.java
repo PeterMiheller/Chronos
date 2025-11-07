@@ -1,34 +1,34 @@
 package com.example.chronos.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Entity
 public class SuperAdmin {
 
+    @Setter
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Getter
     @OneToMany
     private List<Company> companies;
 
+    private String password;
+    private String email;
+
     public SuperAdmin() {}
 
-    public int getId() {
-        return id;
+    public String getPassword() {
+        return password;
     }
 
-    public List<Company> getCompanies() {
-        return companies;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setCompanies(List<Company> companies) {
-        this.companies = companies;
+    public String getEmail() {
+        return email;
     }
 }

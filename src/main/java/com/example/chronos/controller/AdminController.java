@@ -1,8 +1,11 @@
 package com.example.chronos.controller;
 
+import com.example.chronos.DTO.LoginRequest;
+import com.example.chronos.DTO.RegisterRequest;
 import com.example.chronos.model.Admin;
 import com.example.chronos.service.AdminService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 @RestController
@@ -24,4 +27,22 @@ public class AdminController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id) { service.deleteById(id); }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        try {
+            service.registerAdmin(request.getName(), request.getEmail(), request.getPassword());
+            return ResponseEntity.ok("Admin registered successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        boolean success = service.loginAdmin(request.getEmail(), request.getPassword());
+        return success ?
+                ResponseEntity.ok("Admin login successful") :
+                ResponseEntity.status(401).body("Invalid credentials");
+    }
 }
