@@ -27,16 +27,16 @@ public class EmployeeController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id) { service.deleteById(id); }
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        try {
-            service.registerEmployee(request.getName(), request.getEmail(), request.getPassword());
-            return ResponseEntity.ok("Employee registered successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//we dont need a register endpoint for employees, they will be created by admin
+//    @PostMapping("/register")
+//    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+//        try {
+//            service.registerEmployee(request.getName(), request.getEmail(), request.getPassword());
+//            return ResponseEntity.ok("Employee registered successfully");
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {

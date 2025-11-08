@@ -20,25 +20,33 @@ public class EmployeeService {
     public List<Employee> findAll() { return repository.findAll(); }
     public Employee findById(int id) { return repository.findById(id).orElse(null); }
     public void deleteById(int id) { repository.deleteById(id); }
-    public Employee registerEmployee(String name, String email, String rawPassword) {
-        if (repository.findByEmail(email) != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
-        }
-
-        String encodedPassword = passwordEncoder.encode(rawPassword);
-        Employee user = new Employee();
-        user.setName(name);
-        user.setEmail(email);
-        user.setPassword(encodedPassword);
-
-        return repository.save(user);
-    }
+// this is not needed for employees, they will be created by admin, this code could be used later tho
+//    public Employee registerEmployee(String name, String email, String rawPassword) {
+//        if (repository.findByEmail(email) != null) {
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
+//        }
+//
+//        String encodedPassword = passwordEncoder.encode(rawPassword);
+//        Employee user = new Employee();
+//        user.setName(name);
+//        user.setEmail(email);
+//        user.setPassword(encodedPassword);
+//
+//        return repository.save(user);
+//    }
 
     public boolean loginEmployee(String email, String rawPassword) {
-        Employee user = repository.findByEmail(email);
-        if (user == null) {
+        // this is a mock implementation, until we have a db
+        // Employee user = repository.findByEmail(email);
+//        if (user == null) {
+//            return false;
+//        }
+        String mockEmail = "test@example.com";
+        String mockPassword = "123456";
+
+        if (!email.equals(mockEmail)) {
             return false;
         }
-        return passwordEncoder.matches(rawPassword, user.getPassword());
+        return email.equals(mockEmail) && rawPassword.equals(mockPassword);
     }
 }
