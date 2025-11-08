@@ -23,7 +23,9 @@ public class AdminController {
     public Admin getById(@PathVariable int id) { return service.findById(id); }
 
     @PostMapping
-    public Admin create(@RequestBody Admin admin) { return service.save(admin); }
+    public Admin create(@RequestBody Admin admin) {
+        return service.saveWithEncodedPassword(admin);
+    }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id) { service.deleteById(id); }
@@ -36,13 +38,5 @@ public class AdminController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        boolean success = service.loginAdmin(request.getEmail(), request.getPassword());
-        return success ?
-                ResponseEntity.ok("Admin login successful") :
-                ResponseEntity.status(401).body("Invalid credentials");
     }
 }

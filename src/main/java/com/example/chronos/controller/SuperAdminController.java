@@ -24,12 +24,4 @@ public class SuperAdminController {
 
     @PostMapping
     public SuperAdmin create(@RequestBody SuperAdmin superAdmin) { return service.save(superAdmin); }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        boolean success = service.loginSuperAdmin(request.getEmail(), request.getPassword());
-        return success ?
-                ResponseEntity.ok("Admin login successful") :
-                ResponseEntity.status(401).body("Invalid credentials");
-    }
 }

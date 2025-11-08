@@ -23,7 +23,9 @@ public class EmployeeController {
     public Employee getById(@PathVariable int id) { return service.findById(id); }
 
     @PostMapping
-    public Employee create(@RequestBody Employee employee) { return service.save(employee); }
+    public Employee create(@RequestBody Employee employee) {
+        return service.saveWithEncodedPassword(employee);
+    }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id) { service.deleteById(id); }
@@ -38,11 +40,4 @@ public class EmployeeController {
 //        }
 //    }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        boolean success = service.loginEmployee(request.getEmail(), request.getPassword());
-        return success ?
-                ResponseEntity.ok("Employee login successful") :
-                ResponseEntity.status(401).body("Invalid credentials");
-    }
 }
