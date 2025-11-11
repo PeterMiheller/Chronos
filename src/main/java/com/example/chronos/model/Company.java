@@ -1,7 +1,6 @@
 package com.example.chronos.model;
 
 import jakarta.persistence.*;
-
 import java.util.List;
 
 @Entity
@@ -17,58 +16,26 @@ public class Company {
     @Column(nullable = false)
     private String address;
 
-    @ManyToOne
-    @JoinColumn(name = "superadmin_id")
-    private SuperAdmin superAdmin;
-
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Admin> admins;
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    private List<User> users;
 
     public Company() {}
 
-    public Company(String name, String address, SuperAdmin superAdmin) {
+    public Company(String name, String address) {
         this.name = name;
         this.address = address;
-        this.superAdmin = superAdmin;
     }
 
-    public int getId() {
-        return id;
-    }
+    // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public SuperAdmin getSuperAdmin() {
-        return superAdmin;
-    }
-
-    public void setSuperAdmin(SuperAdmin superAdmin) {
-        this.superAdmin = superAdmin;
-    }
-
-    public List<Admin> getAdmins() {
-        return admins;
-    }
-
-    public void setAdmins(List<Admin> admins) {
-        this.admins = admins;
-    }
+    public List<User> getUsers() { return users; }
+    public void setUsers(List<User> users) { this.users = users; }
 }

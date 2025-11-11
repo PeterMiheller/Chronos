@@ -1,7 +1,6 @@
 package com.example.chronos.service;
 
 import com.example.chronos.model.Company;
-import com.example.chronos.model.SuperAdmin;
 import com.example.chronos.repository.CompanyRepository;
 import org.springframework.stereotype.Service;
 
@@ -31,14 +30,8 @@ public class CompanyService {
         companyRepository.deleteById(id);
     }
 
-    public Company createCompany(String name, String address, SuperAdmin superAdmin) {
-        Company company = new Company(name, address, superAdmin);
+    public Company createCompany(String name, String address) {
+        Company company = new Company(name, address);
         return companyRepository.save(company);
-    }
-
-    public List<Company> findBySuperAdminId(int superAdminId) {
-        return companyRepository.findAll().stream()
-                .filter(company -> company.getSuperAdmin().getId() == superAdminId)
-                .toList();
     }
 }
