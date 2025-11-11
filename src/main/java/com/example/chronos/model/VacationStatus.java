@@ -1,7 +1,12 @@
 package com.example.chronos.model;
 
 public enum VacationStatus {
-    NEW,
+    CREATED,
+    SUBMITTED,
     APPROVED,
-    REJECTED
+    REJECTED,
+    REVISED,
+    RESUBMITTED,
+    CANCELLED,
+    EXPIRED
 }

@@ -1,18 +1,44 @@
 package com.example.chronos.service;
 
 import com.example.chronos.model.Company;
+import com.example.chronos.model.SuperAdmin;
 import com.example.chronos.repository.CompanyRepository;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
 public class CompanyService {
-    private final CompanyRepository repository;
+    private final CompanyRepository companyRepository;
 
-    public CompanyService(CompanyRepository repository) { this.repository = repository; }
+    public CompanyService(CompanyRepository companyRepository) {
+        this.companyRepository = companyRepository;
+    }
 
-    public Company save(Company company) { return repository.save(company); }
-    public List<Company> findAll() { return repository.findAll(); }
-    public Company findById(int id) { return repository.findById(id).orElse(null); }
-    public void deleteById(int id) { repository.deleteById(id); }
+    public Company save(Company company) {
+        return companyRepository.save(company);
+    }
+
+    public List<Company> findAll() {
+        return companyRepository.findAll();
+    }
+
+    public Company findById(int id) {
+        return companyRepository.findById(id).orElse(null);
+    }
+
+    public void deleteById(int id) {
+        companyRepository.deleteById(id);
+    }
+
+    public Company createCompany(String name, String address, SuperAdmin superAdmin) {
+        Company company = new Company(name, address, superAdmin);
+        return companyRepository.save(company);
+    }
+
+    public List<Company> findBySuperAdminId(int superAdminId) {
+        return companyRepository.findAll().stream()
+                .filter(company -> company.getSuperAdmin().getId() == superAdminId)
+                .toList();
+    }
 }
