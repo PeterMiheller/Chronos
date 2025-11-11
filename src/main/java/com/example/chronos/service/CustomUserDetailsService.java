@@ -1,7 +1,6 @@
 package com.example.chronos.service;
 
-import com.example.chronos.repository.EmployeeRepository;
-import com.example.chronos.repository.AdminRepository;
+import com.example.chronos.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,21 +9,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final EmployeeRepository employeeRepository;
-    private final AdminRepository adminRepository;
+    private final UserRepository userRepository;
 
-    public CustomUserDetailsService(EmployeeRepository employeeRepository, AdminRepository adminRepository) {
-        this.employeeRepository = employeeRepository;
-        this.adminRepository = adminRepository;
+    public CustomUserDetailsService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // Try to find employee first, then admin
-        return employeeRepository.findByEmail(email)
-                .map(employee -> (UserDetails) employee)
-                .orElseGet(() -> adminRepository.findByEmail(email)
-                        .map(admin -> (UserDetails) admin)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email)));
+        UserDetails user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with email: " + email);
+        }
+        return user;
     }
 }
