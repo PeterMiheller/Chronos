@@ -1,7 +1,7 @@
 package com.example.chronos.model;
 
-public enum Role {
+public enum UserType {
     SUPERADMIN,
-    ADMIN,
+    ADMINISTRATOR,
     EMPLOYEE
 }
