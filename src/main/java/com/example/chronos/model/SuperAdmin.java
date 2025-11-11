@@ -1,34 +1,27 @@
 package com.example.chronos.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 
 @Entity
-public class SuperAdmin {
+@DiscriminatorValue("SUPERADMIN")
+public class SuperAdmin extends User {
 
-    @Setter
-    @Getter
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
-    @Getter
-    @OneToMany
+    @OneToMany(mappedBy = "superAdmin", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Company> companies;
-
-    private String password;
-    private String email;
 
     public SuperAdmin() {}
 
-    public String getPassword() {
-        return password;
+    public SuperAdmin(String email, String password, String name) {
+        super(email, password, name);
     }
 
-    public String getEmail() {
-        return email;
+    public List<Company> getCompanies() {
+        return companies;
+    }
+
+    public void setCompanies(List<Company> companies) {
+        this.companies = companies;
     }
 }
