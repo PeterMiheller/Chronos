@@ -7,6 +7,7 @@ import com.example.chronos.repository.EmployeeRepository;
 import com.example.chronos.repository.AdminRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -43,16 +44,16 @@ public class AuthService {
                         .orElseThrow(() -> new RuntimeException("User not found")));
 
         Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("role", user.getUserType().name());
+        extraClaims.put("role", user.getRole());
         extraClaims.put("userId", user.getId());
 
-        String jwtToken = jwtService.generateToken(extraClaims, user);
+        String jwtToken = jwtService.generateToken(extraClaims, (UserDetails) user);
 
         return new AuthResponse(
                 jwtToken,
                 user.getEmail(),
                 user.getName(),
-                user.getUserType().name()
+                user.getRole().toString()
         );
     }
 }

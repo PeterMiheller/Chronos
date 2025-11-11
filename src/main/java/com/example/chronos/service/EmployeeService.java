@@ -1,6 +1,7 @@
 package com.example.chronos.service;
 
 import com.example.chronos.model.Admin;
+import com.example.chronos.model.Company;
 import com.example.chronos.model.Employee;
 import com.example.chronos.repository.EmployeeRepository;
 import org.springframework.http.HttpStatus;
@@ -36,11 +37,11 @@ public class EmployeeService {
     }
 
     public Employee findByEmail(String email) {
-        return employeeRepository.findByEmail(email);
+        return employeeRepository.findByEmail(email).orElse(null);
     }
 
     public Employee createEmployee(String name, String email, String rawPassword, Admin admin, Company company, int vacationDaysTotal, float expectedWorkload) {
-        if (employeeRepository.findByEmail(email) != null) {
+        if (employeeRepository.findByEmail(email).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
         }
 
@@ -50,7 +51,7 @@ public class EmployeeService {
     }
 
     public boolean validatePassword(String email, String rawPassword) {
-        Employee employee = employeeRepository.findByEmail(email);
+        Employee employee = employeeRepository.findByEmail(email).orElse(null);
         if (employee == null) {
             return false;
         }

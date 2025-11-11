@@ -74,22 +74,24 @@ public class User {
     public void setUserType(UserType userType) { this.userType = userType; }
 
     public Integer getVacationDaysTotal() { return vacationDaysTotal; }
-    public void setVacationDaysTotal(Integer vacationDaysTotal) { 
-        this.vacationDaysTotal = vacationDaysTotal; 
+    public void setVacationDaysTotal(Integer vacationDaysTotal) {
+        this.vacationDaysTotal = vacationDaysTotal;
     }
 
     public Integer getVacationDaysRemaining() { return vacationDaysRemaining; }
-    public void setVacationDaysRemaining(Integer vacationDaysRemaining) { 
-        this.vacationDaysRemaining = vacationDaysRemaining; 
+    public void setVacationDaysRemaining(Integer vacationDaysRemaining) {
+        this.vacationDaysRemaining = vacationDaysRemaining;
     }
 
     public Float getExpectedWorkload() { return expectedWorkload; }
-    public void setExpectedWorkload(Float expectedWorkload) { 
-        this.expectedWorkload = expectedWorkload; 
+    public void setExpectedWorkload(Float expectedWorkload) {
+        this.expectedWorkload = expectedWorkload;
     }
 
     public Integer getAdministratorId() { return administratorId; }
-    public void setAdministratorId(Integer administratorId) { 
-        this.administratorId = administratorId; 
+    public void setAdministratorId(Integer administratorId) {
+        this.administratorId = administratorId;
     }
+
+    public abstract Role getRole();
 }
