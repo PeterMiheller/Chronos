@@ -29,12 +29,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configure(http))  // Enable CORS
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/superadmins/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/admins/**").hasAnyRole("SUPERADMIN", "ADMIN")
-                        .requestMatchers("/employees/**").hasAnyRole("SUPERADMIN", "ADMIN", "EMPLOYEE")
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/superadmins/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/admins/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
+                        .requestMatchers("/api/employees/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        .requestMatchers("/api/users/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
+                        .requestMatchers("/api/companies/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
+                        .requestMatchers("/api/vacation-requests/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
