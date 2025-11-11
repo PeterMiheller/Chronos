@@ -29,4 +29,12 @@ public class VacationRequestService {
     public void deleteById(int id) {
         vacationRequestRepository.deleteById(id);
     }
+
+    public List<VacationRequest> findByEmployeeId(int employeeId) {
+        return vacationRequestRepository.findByEmployeeId(employeeId);
+    }
+
+    public List<VacationRequest> findByAdministratorId(int administratorId) {
+        return vacationRequestRepository.findByAdministratorId(administratorId);
+    }
 }

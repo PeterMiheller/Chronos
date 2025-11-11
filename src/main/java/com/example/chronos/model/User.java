@@ -1,5 +1,8 @@
 package com.example.chronos.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -13,6 +16,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column(nullable = false)
@@ -20,6 +24,7 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "company_id")
+    @JsonIgnoreProperties("users")
     private Company company;
 
     @Enumerated(EnumType.STRING)

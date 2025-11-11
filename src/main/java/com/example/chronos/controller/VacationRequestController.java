@@ -38,4 +38,14 @@ public class VacationRequestController {
         vacationRequestService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/employee/{employeeId}")
+    public ResponseEntity<List<VacationRequest>> getVacationRequestsByEmployee(@PathVariable int employeeId) {
+        return ResponseEntity.ok(vacationRequestService.findByEmployeeId(employeeId));
+    }
+
+    @GetMapping("/administrator/{administratorId}")
+    public ResponseEntity<List<VacationRequest>> getVacationRequestsByAdministrator(@PathVariable int administratorId) {
+        return ResponseEntity.ok(vacationRequestService.findByAdministratorId(administratorId));
+    }
 }
