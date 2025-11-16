@@ -2,6 +2,7 @@ package com.example.chronos.controller;
 
 import com.example.chronos.model.VacationRequest;
 import com.example.chronos.service.VacationRequestService;
+import com.example.chronos.DTO.VacationStatusUpdateRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,5 +48,22 @@ public class VacationRequestController {
     @GetMapping("/administrator/{administratorId}")
     public ResponseEntity<List<VacationRequest>> getVacationRequestsByAdministrator(@PathVariable int administratorId) {
         return ResponseEntity.ok(vacationRequestService.findByAdministratorId(administratorId));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<VacationRequest> updateRequestStatus(
+            @PathVariable int id,
+            @RequestBody VacationStatusUpdateRequest requestUpdate) {
+
+        VacationRequest updatedRequest = vacationRequestService.updateVacationRequestStatus(
+                id,
+                requestUpdate.getStatus()
+        );
+
+        if (updatedRequest == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(updatedRequest);
     }
 }
