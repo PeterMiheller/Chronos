@@ -1,8 +1,10 @@
 package com.example.chronos.service;
 
 import com.example.chronos.model.VacationRequest;
+import com.example.chronos.model.VacationStatus;
 import com.example.chronos.repository.VacationRequestRepository;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 import java.util.List;
 
@@ -36,5 +38,15 @@ public class VacationRequestService {
 
     public List<VacationRequest> findByAdministratorId(int administratorId) {
         return vacationRequestRepository.findByAdministratorId(administratorId);
+    }
+
+    public VacationRequest updateVacationRequestStatus(int id, VacationStatus status) {
+        Optional<VacationRequest> optionalRequest = vacationRequestRepository.findById(id);
+        if (optionalRequest.isEmpty()) {
+            return null;
+        }
+        VacationRequest existingRequest = optionalRequest.get();
+        existingRequest.setStatus(status);
+        return vacationRequestRepository.save(existingRequest);
     }
 }
