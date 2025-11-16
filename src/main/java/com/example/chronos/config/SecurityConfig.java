@@ -29,7 +29,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configure(http))  // Enable CORS
+                .cors(cors -> cors.configure(http)) // Enable CORS
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
@@ -38,12 +38,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/employees/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/users/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
                         .requestMatchers("/api/companies/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
-                        .requestMatchers("/api/vacation-requests/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("/api/vacation-requests/**")
+                        .hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
