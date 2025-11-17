@@ -46,6 +46,7 @@ public class AuthService {
         Integer companyId = user.getCompany() != null ? user.getCompany().getId() : null;
 
         return new AuthResponse(
+                user.getId(),
                 jwtToken,
                 user.getEmail(),
                 user.getName(),
