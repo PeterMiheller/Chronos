@@ -46,7 +46,7 @@ public class DataInitializer {
             admin.setName("Manager User");
             admin.setCompany(testCompany);
             admin.setUserType(UserType.ADMINISTRATOR);
-            userRepository.save(admin);
+            admin = userRepository.save(admin); // Save and reassign to get the ID
             System.out.println("Created ADMINISTRATOR user: " + admin.getEmail() + " with password: manager123");
 
             // Create an EMPLOYEE user
@@ -59,7 +59,7 @@ public class DataInitializer {
             employee.setVacationDaysTotal(21);
             employee.setVacationDaysRemaining(21);
             employee.setExpectedWorkload(8.0f);
-            employee.setAdministratorId(admin.getId());
+            employee.setAdministratorId(admin.getId()); // Now admin has an ID
             userRepository.save(employee);
             System.out.println("Created EMPLOYEE user: " + employee.getEmail() + " with password: employee123");
 

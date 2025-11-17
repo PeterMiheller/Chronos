@@ -1,6 +1,7 @@
 package com.example.chronos.DTO;
 
 public class AuthResponse {
+    private Integer id;
     private String token;
     private String email;
     private String name;
@@ -25,7 +26,24 @@ public class AuthResponse {
         this.companyId = companyId;
     }
 
+    public AuthResponse(Integer id, String token, String email, String name, String role, Integer companyId) {
+        this.id = id;
+        this.token = token;
+        this.email = email;
+        this.name = name;
+        this.role = role;
+        this.companyId = companyId;
+    }
+
     // Getters and Setters
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getToken() {
         return token;
     }
