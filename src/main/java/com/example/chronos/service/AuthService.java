@@ -19,7 +19,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthService(UserRepository userRepository,
-                       JwtService jwtService, AuthenticationManager authenticationManager) {
+            JwtService jwtService, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -29,9 +29,7 @@ public class AuthService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword()
-                )
-        );
+                        request.getPassword()));
 
         // Find user by email
         User user = userRepository.findByEmail(request.getEmail());
@@ -45,11 +43,14 @@ public class AuthService {
 
         String jwtToken = jwtService.generateToken(extraClaims, user);
 
+        Integer companyId = user.getCompany() != null ? user.getCompany().getId() : null;
+
         return new AuthResponse(
+                user.getId(),
                 jwtToken,
                 user.getEmail(),
                 user.getName(),
-                user.getRole().name()
-        );
+                user.getRole().name(),
+                companyId);
     }
 }
