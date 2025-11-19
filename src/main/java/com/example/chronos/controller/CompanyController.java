@@ -1,5 +1,7 @@
 package com.example.chronos.controller;
 
+import com.example.chronos.DTO.CompanyWithAdminsResponse;
+import com.example.chronos.DTO.CreateCompanyRequest;
 import com.example.chronos.model.Company;
 import com.example.chronos.service.CompanyService;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,11 @@ public class CompanyController {
         return ResponseEntity.ok(companyService.findAll());
     }
 
+    @GetMapping("/withAdmins")
+    public ResponseEntity<List<CompanyWithAdminsResponse>> getAllCompaniesWithAdmins() {
+        return ResponseEntity.ok(companyService.getAllCompaniesWithAdmins());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable int id) {
         Company company = companyService.findById(id);
@@ -30,6 +37,12 @@ public class CompanyController {
     @PostMapping
     public ResponseEntity<Company> createCompany(@RequestBody Company company) {
         Company savedCompany = companyService.save(company);
+        return ResponseEntity.ok(savedCompany);
+    }
+
+    @PostMapping("/superadmin")
+    public ResponseEntity<Company> createCompanybySuperAdmin(@RequestBody CreateCompanyRequest request) {
+        Company savedCompany = companyService.createCompany(request.getName(), request.getAddress());
         return ResponseEntity.ok(savedCompany);
     }
 
