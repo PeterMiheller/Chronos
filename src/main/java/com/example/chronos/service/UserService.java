@@ -1,5 +1,6 @@
 package com.example.chronos.service;
 
+import com.example.chronos.DTO.CreateAdminRequest;
 import com.example.chronos.model.User;
 import com.example.chronos.model.UserType;
 import com.example.chronos.repository.UserRepository;
@@ -10,9 +11,11 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final CompanyService companyService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, CompanyService companyService) {
         this.userRepository = userRepository;
+        this.companyService = companyService;
     }
 
     public User save(User user) {
@@ -92,5 +95,19 @@ public class UserService {
             return userRepository.save(employee);
         }
         return null;
+    }
+
+    public User createAdmin(CreateAdminRequest req) {
+        User admin = new User();
+        admin.setName(req.getName());
+        admin.setEmail(req.getEmail());
+        admin.setPassword(req.getPassword());
+        admin.setAdministratorId(null);
+        admin.setExpectedWorkload(0.0f);
+        admin.setVacationDaysTotal(0);
+        admin.setVacationDaysRemaining(0);
+        admin.setCompany(companyService.getDefaultCompany());
+        admin.setUserType(UserType.ADMINISTRATOR);
+        return userRepository.save(admin);
     }
 }

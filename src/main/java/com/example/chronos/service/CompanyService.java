@@ -34,4 +34,10 @@ public class CompanyService {
         Company company = new Company(name, address);
         return companyRepository.save(company);
     }
+
+    public Company getDefaultCompany() {
+        Company defaultCompany = new Company("Default Company", "Default Address");
+        defaultCompany.setId(1);
+        return defaultCompany;
+    }
 }
