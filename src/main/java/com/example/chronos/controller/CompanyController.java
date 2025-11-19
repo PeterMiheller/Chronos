@@ -25,7 +25,7 @@ public class CompanyController {
 
     @GetMapping("/withAdmins")
     public ResponseEntity<List<CompanyWithAdminsResponse>> getAllCompaniesWithAdmins() {
-        return ResponseEntity.ok(companyService.getAllCompaniesWithAdmins());
+        return ResponseEntity.ok(companyService.getAllCompaniesWithAdmin());
     }
 
     @GetMapping("/{id}")
@@ -42,7 +42,7 @@ public class CompanyController {
 
     @PostMapping("/superadmin")
     public ResponseEntity<Company> createCompanybySuperAdmin(@RequestBody CreateCompanyRequest request) {
-        Company savedCompany = companyService.createCompany(request.getName(), request.getAddress());
+        Company savedCompany = companyService.createCompany(request.getName(), request.getAddress(), request.getAdminId());
         return ResponseEntity.ok(savedCompany);
     }
 

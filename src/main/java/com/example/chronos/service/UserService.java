@@ -4,6 +4,7 @@ import com.example.chronos.DTO.CreateAdminRequest;
 import com.example.chronos.model.User;
 import com.example.chronos.model.UserType;
 import com.example.chronos.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,10 +13,12 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final CompanyService companyService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, CompanyService companyService) {
+    public UserService(UserRepository userRepository, CompanyService companyService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.companyService = companyService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User save(User user) {
@@ -101,12 +104,12 @@ public class UserService {
         User admin = new User();
         admin.setName(req.getName());
         admin.setEmail(req.getEmail());
-        admin.setPassword(req.getPassword());
+        admin.setPassword(passwordEncoder.encode(req.getPassword()));
         admin.setAdministratorId(null);
         admin.setExpectedWorkload(0.0f);
         admin.setVacationDaysTotal(0);
         admin.setVacationDaysRemaining(0);
-        admin.setCompany(companyService.getDefaultCompany());
+        admin.setCompany(null);  // Company will be set when the company is created
         admin.setUserType(UserType.ADMINISTRATOR);
         return userRepository.save(admin);
     }

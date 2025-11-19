@@ -3,23 +3,23 @@ package com.example.chronos.DTO;
 import com.example.chronos.model.Company;
 import com.example.chronos.model.User;
 
-import java.util.List;
-
 public class CompanyWithAdminsResponse {
     private int id;
     private String name;
     private String address;
-    private List<AdminResponse> admins;
+    private String adminContactName;
+    private String adminContactEmail;
 
     public CompanyWithAdminsResponse() {}
 
-    public CompanyWithAdminsResponse(Company company, List<User> admins) {
+    public CompanyWithAdminsResponse(Company company, User admin) {
         this.id = company.getId();
         this.name = company.getName();
         this.address = company.getAddress();
-        this.admins = admins.stream()
-                .map(admin -> new AdminResponse(admin.getId(), admin.getName(), admin.getEmail()))
-                .toList();
+        if (admin != null) {
+            this.adminContactName = admin.getName();
+            this.adminContactEmail = admin.getEmail();
+        }
     }
 
     // Getters and Setters
@@ -47,52 +47,20 @@ public class CompanyWithAdminsResponse {
         this.address = address;
     }
 
-    public List<AdminResponse> getAdmins() {
-        return admins;
+    public String getAdminContactName() {
+        return adminContactName;
     }
 
-    public void setAdmins(List<AdminResponse> admins) {
-        this.admins = admins;
+    public void setAdminContactName(String adminContactName) {
+        this.adminContactName = adminContactName;
     }
 
-    // Inner class for admin details
-    public static class AdminResponse {
-        private int id;
-        private String name;
-        private String email;
+    public String getAdminContactEmail() {
+        return adminContactEmail;
+    }
 
-        public AdminResponse() {}
-
-        public AdminResponse(int id, String name, String email) {
-            this.id = id;
-            this.name = name;
-            this.email = email;
-        }
-
-        // Getters and Setters
-        public int getId() {
-            return id;
-        }
-
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
+    public void setAdminContactEmail(String adminContactEmail) {
+        this.adminContactEmail = adminContactEmail;
     }
 }
 
