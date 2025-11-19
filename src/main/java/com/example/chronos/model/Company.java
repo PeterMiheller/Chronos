@@ -17,7 +17,7 @@ public class Company {
     @Column(nullable = false)
     private String address;
 
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "company")
     @JsonIgnore
     private List<User> users;
 

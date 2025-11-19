@@ -41,7 +41,7 @@ public class UserController {
 
     @GetMapping("/administrators")
     public ResponseEntity<List<User>> getAllAdministrators() {
-        return ResponseEntity.ok(userService.findAllAdministrators());
+        return ResponseEntity.ok(userService.findAvailableAdministrators());
     }
 
     @GetMapping("/superadmins")

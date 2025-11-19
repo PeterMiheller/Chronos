@@ -34,6 +34,14 @@ public class CompanyService {
     }
 
     public void deleteById(int id) {
+        // First, unlink all users from this company
+        List<User> users = userRepository.findByCompanyId(id);
+        for (User user : users) {
+            user.setCompany(null);
+            userRepository.save(user);
+        }
+
+        // Now delete the company
         companyRepository.deleteById(id);
     }
 
@@ -45,6 +53,10 @@ public class CompanyService {
         if (adminId != null) {
             User admin = userRepository.findById(adminId).orElse(null);
             if (admin != null && admin.getUserType() == UserType.ADMINISTRATOR) {
+                // Check if admin is already assigned to another company
+                if (admin.getCompany() != null) {
+                    throw new IllegalStateException("Admin is already assigned to company: " + admin.getCompany().getName());
+                }
                 admin.setCompany(company);
                 userRepository.save(admin);
             }
@@ -60,6 +72,52 @@ public class CompanyService {
             return createCompany("Default Company", "Default Address", null);
         }
         return companies.get(0);
+    }
+
+    public Company updateCompany(int id, String name, String address, Integer newAdminId) {
+        Company company = findById(id);
+        if (company == null) {
+            return null;
+        }
+
+        // Update company details
+        company.setName(name);
+        company.setAddress(address);
+        company = companyRepository.save(company);
+
+        // Handle admin reassignment if a new admin ID is provided
+        if (newAdminId != null) {
+            // Find the current admin for this company
+            User currentAdmin = userRepository.findByCompanyId(id).stream()
+                    .filter(user -> user.getUserType() == UserType.ADMINISTRATOR)
+                    .findFirst()
+                    .orElse(null);
+
+            // Find the new admin
+            User newAdmin = userRepository.findById(newAdminId).orElse(null);
+
+            // Only proceed if the new admin exists and is different from current admin
+            if (newAdmin != null && newAdmin.getUserType() == UserType.ADMINISTRATOR) {
+                // Check if new admin is already assigned to another company
+                if (newAdmin.getCompany() != null && newAdmin.getCompany().getId() != id) {
+                    throw new IllegalStateException("Admin is already assigned to company: " + newAdmin.getCompany().getName());
+                }
+
+                // Unlink current admin if exists and is different from new admin
+                if (currentAdmin != null && currentAdmin.getId() != newAdminId) {
+                    currentAdmin.setCompany(null);
+                    userRepository.save(currentAdmin);
+                }
+
+                // Link new admin to this company
+                if (newAdmin.getCompany() == null || newAdmin.getCompany().getId() != id) {
+                    newAdmin.setCompany(company);
+                    userRepository.save(newAdmin);
+                }
+            }
+        }
+
+        return company;
     }
 
     public List<CompanyWithAdminsResponse> getAllCompaniesWithAdmin() {

@@ -12,12 +12,10 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final CompanyService companyService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, CompanyService companyService, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.companyService = companyService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -49,6 +47,13 @@ public class UserService {
     // Get all administrators
     public List<User> findAllAdministrators() {
         return userRepository.findByUserType(UserType.ADMINISTRATOR);
+    }
+
+    // Get administrators without a company (available for assignment)
+    public List<User> findAvailableAdministrators() {
+        return userRepository.findByUserType(UserType.ADMINISTRATOR).stream()
+                .filter(user -> user.getCompany() == null)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     // Get all superadmins
