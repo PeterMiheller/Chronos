@@ -1,5 +1,6 @@
 package com.example.chronos.controller;
 
+import com.example.chronos.DTO.CreateAdminRequest;
 import com.example.chronos.model.User;
 import com.example.chronos.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class UserController {
 
     @GetMapping("/administrators")
     public ResponseEntity<List<User>> getAllAdministrators() {
-        return ResponseEntity.ok(userService.findAllAdministrators());
+        return ResponseEntity.ok(userService.findAvailableAdministrators());
     }
 
     @GetMapping("/superadmins")
@@ -62,6 +63,12 @@ public class UserController {
     public ResponseEntity<User> createUser(@RequestBody User user) {
         User savedUser = userService.save(user);
         return ResponseEntity.ok(savedUser);
+    }
+
+    @PostMapping("/admin")
+    public ResponseEntity<User> createAdmin(@RequestBody CreateAdminRequest req) {
+        User admin = userService.createAdmin(req);
+        return ResponseEntity.ok(admin);
     }
 
     @PutMapping("/{id}")
