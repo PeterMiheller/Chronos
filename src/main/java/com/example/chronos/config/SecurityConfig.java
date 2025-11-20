@@ -34,8 +34,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/auth/**").permitAll()
+                        // More specific routes first
+                        .requestMatchers("/api/users/{id}/dashboard-summary").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/users/email/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/users/{id}").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        // Generic routes after specific ones
                         .requestMatchers("/api/users/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
                         .requestMatchers("/api/companies/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
                         .requestMatchers("/api/vacation-requests/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
