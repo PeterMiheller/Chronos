@@ -8,6 +8,8 @@ import com.example.chronos.repository.UserRepository;
 import com.example.chronos.repository.VacationRequestRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -52,6 +54,20 @@ public class VacationRequestService {
             throw new RuntimeException("Start date cannot be after end date");
         }
 
+        long workingDays = calculateWorkingDays(dto.getStartDate(), dto.getEndDate());
+        if (workingDays < 1) {
+            throw new RuntimeException("Vacation request must include at least 1 working day.");
+        }
+
+        if (vacationRequestRepository.existsOverlap(
+                user.getId(),
+                dto.getStartDate(),
+                dto.getEndDate()
+        )) {
+            throw new RuntimeException("Vacation dates overlap with an existing request.");
+        }
+
+
         VacationRequest req = new VacationRequest();
         req.setEmployeeId(user.getId());
         req.setAdministratorId(user.getAdministratorId());
@@ -62,6 +78,22 @@ public class VacationRequestService {
 
         return vacationRequestRepository.save(req);
     }
+
+    private long calculateWorkingDays(LocalDate start, LocalDate end) {
+        long count = 0;
+        LocalDate current = start;
+
+        while (!current.isAfter(end)) {
+            DayOfWeek day = current.getDayOfWeek();
+            if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
+                count++;
+            }
+            current = current.plusDays(1);
+        }
+
+        return count;
+    }
+
 
 
 
