@@ -5,6 +5,8 @@ import com.example.chronos.model.VacationStatus;
 public class VacationStatusUpdateRequest {
     private VacationStatus status;
 
+    public VacationStatusUpdateRequest() {
+    }
     public VacationStatus getStatus() {
         return status;
     }
