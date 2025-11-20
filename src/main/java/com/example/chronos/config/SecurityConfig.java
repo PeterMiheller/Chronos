@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) // Enable CORS
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/auth/**").permitAll()
                         .requestMatchers("/api/superadmins/**").hasRole("SUPERADMIN")
                         .requestMatchers("/api/admins/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
                         .requestMatchers("/api/employees/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")

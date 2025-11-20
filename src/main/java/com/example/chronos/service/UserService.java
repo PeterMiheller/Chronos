@@ -1,8 +1,10 @@
 package com.example.chronos.service;
 
+import com.example.chronos.DTO.CreateAdminRequest;
 import com.example.chronos.model.User;
 import com.example.chronos.model.UserType;
 import com.example.chronos.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,9 +12,11 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User save(User user) {
@@ -43,6 +47,13 @@ public class UserService {
     // Get all administrators
     public List<User> findAllAdministrators() {
         return userRepository.findByUserType(UserType.ADMINISTRATOR);
+    }
+
+    // Get administrators without a company (available for assignment)
+    public List<User> findAvailableAdministrators() {
+        return userRepository.findByUserType(UserType.ADMINISTRATOR).stream()
+                .filter(user -> user.getCompany() == null)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     // Get all superadmins
@@ -92,5 +103,19 @@ public class UserService {
             return userRepository.save(employee);
         }
         return null;
+    }
+
+    public User createAdmin(CreateAdminRequest req) {
+        User admin = new User();
+        admin.setName(req.getName());
+        admin.setEmail(req.getEmail());
+        admin.setPassword(passwordEncoder.encode(req.getPassword()));
+        admin.setAdministratorId(null);
+        admin.setExpectedWorkload(0.0f);
+        admin.setVacationDaysTotal(0);
+        admin.setVacationDaysRemaining(0);
+        admin.setCompany(null);  // Company will be set when the company is created
+        admin.setUserType(UserType.ADMINISTRATOR);
+        return userRepository.save(admin);
     }
 }

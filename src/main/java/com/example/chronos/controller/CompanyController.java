@@ -1,5 +1,8 @@
 package com.example.chronos.controller;
 
+import com.example.chronos.DTO.CompanyWithAdminsResponse;
+import com.example.chronos.DTO.CreateCompanyRequest;
+import com.example.chronos.DTO.UpdateCompanyRequest;
 import com.example.chronos.model.Company;
 import com.example.chronos.service.CompanyService;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,11 @@ public class CompanyController {
         return ResponseEntity.ok(companyService.findAll());
     }
 
+    @GetMapping("/withAdmins")
+    public ResponseEntity<List<CompanyWithAdminsResponse>> getAllCompaniesWithAdmins() {
+        return ResponseEntity.ok(companyService.getAllCompaniesWithAdmin());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable int id) {
         Company company = companyService.findById(id);
@@ -33,14 +41,16 @@ public class CompanyController {
         return ResponseEntity.ok(savedCompany);
     }
 
+    @PostMapping("/superadmin")
+    public ResponseEntity<Company> createCompanybySuperAdmin(@RequestBody CreateCompanyRequest request) {
+        Company savedCompany = companyService.createCompany(request.getName(), request.getAddress(), request.getAdminId());
+        return ResponseEntity.ok(savedCompany);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Company> updateCompany(@PathVariable int id, @RequestBody Company company) {
-        Company existingCompany = companyService.findById(id);
-        if (existingCompany == null) {
-            return ResponseEntity.notFound().build();
-        }
-        company.setId(id);
-        return ResponseEntity.ok(companyService.save(company));
+    public ResponseEntity<Company> updateCompany(@PathVariable int id, @RequestBody UpdateCompanyRequest request) {
+        Company updatedCompany = companyService.updateCompany(id, request.getName(), request.getAddress(), request.getAdminId());
+        return updatedCompany != null ? ResponseEntity.ok(updatedCompany) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
