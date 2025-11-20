@@ -1,11 +1,15 @@
 package com.example.chronos.controller;
 
 import com.example.chronos.DTO.CreateAdminRequest;
+import com.example.chronos.DTO.DashboardSummaryResponse;
 import com.example.chronos.model.User;
+import com.example.chronos.model.UserType;
 import com.example.chronos.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -110,5 +114,64 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable int id) {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/dashboard-summary")
+    public ResponseEntity<?> getDashboardSummary(@PathVariable int id, Authentication authentication) {
+        try {
+            User user = userService.findById(id);
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            String currentUserEmail = authentication.getName();
+            User currentUser = userService.findByEmail(currentUserEmail);
+            
+            if (currentUser == null) {
+                return ResponseEntity.status(403).body(new HashMap<String, String>() {{
+                    put("error", "User not found");
+                }});
+            }
+
+            // Allow if: user viewing own data, or user is ADMINISTRATOR/SUPERADMIN
+            boolean isOwnData = currentUser.getId() == id;
+            boolean isAdmin = currentUser.getUserType() == UserType.ADMINISTRATOR || 
+                             currentUser.getUserType() == UserType.SUPERADMIN;
+            
+            if (!isOwnData && !isAdmin) {
+                return ResponseEntity.status(403).body(new HashMap<String, String>() {{
+                    put("error", "Access denied");
+                }});
+            }
+
+            Integer vacationTotal = user.getVacationDaysTotal() != null ? user.getVacationDaysTotal() : 0;
+            Integer vacationRemaining = user.getVacationDaysRemaining() != null ? user.getVacationDaysRemaining() : 0;
+            Integer vacationUsed = vacationTotal - vacationRemaining;
+
+            DashboardSummaryResponse.VacationDaysSummary vacationSummary = 
+                new DashboardSummaryResponse.VacationDaysSummary(vacationTotal, vacationUsed, vacationRemaining);
+
+            Float expectedWorkload = user.getExpectedWorkload() != null ? user.getExpectedWorkload() : 40f;
+            Float weeklyTarget = expectedWorkload;
+            Float hoursThisWeek = 0f;
+
+            DashboardSummaryResponse.WeeklyHoursSummary weeklySummary = 
+                new DashboardSummaryResponse.WeeklyHoursSummary(hoursThisWeek, weeklyTarget);
+
+            Integer pendingRequests = 0;
+
+            DashboardSummaryResponse response = new DashboardSummaryResponse(
+                    user,
+                    vacationSummary,
+                    weeklySummary,
+                    pendingRequests
+            );
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new HashMap<String, String>() {{
+                put("error", e.getMessage());
+            }});
+        }
     }
 }

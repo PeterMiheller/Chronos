@@ -30,15 +30,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults()) // Enable CORS
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/auth/**").permitAll()
-                        .requestMatchers("/api/superadmins/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/admins/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
-                        .requestMatchers("/api/employees/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        // More specific routes first
+                        .requestMatchers("/api/users/{id}/dashboard-summary").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        .requestMatchers("/api/users/email/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        .requestMatchers("/api/users/{id}").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        // Generic routes after specific ones
                         .requestMatchers("/api/users/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
                         .requestMatchers("/api/companies/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
+                        .requestMatchers("/api/vacation-requests/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        .requestMatchers("/api/timesheets/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        .requestMatchers("/api/events/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/vacation-requests/*/status").hasRole( "ADMINISTRATOR")
                         .requestMatchers("/api/vacation-requests/**")
                         .hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
