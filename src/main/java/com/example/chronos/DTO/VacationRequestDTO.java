@@ -2,7 +2,7 @@ package com.example.chronos.DTO;
 
 import java.time.LocalDate;
 
-public class VacationRequest {
+public class VacationRequestDTO {
 
     private Integer employeeId;
 
@@ -12,16 +12,14 @@ public class VacationRequest {
 
     private LocalDate endDate;
 
-    private String reason;
 
-    public VacationRequest() {}
+    public VacationRequestDTO() {}
 
-    public VacationRequest(Integer employeeId, Integer administratorId, LocalDate startDate, LocalDate endDate, String reason) {
+    public VacationRequestDTO(Integer employeeId, Integer administratorId, LocalDate startDate, LocalDate endDate) {
         this.employeeId = employeeId;
         this.administratorId = administratorId;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.reason = reason;
     }
 
 
@@ -37,6 +35,4 @@ public class VacationRequest {
     public LocalDate getEndDate() { return endDate; }
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
 }

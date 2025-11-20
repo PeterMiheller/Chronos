@@ -19,38 +19,47 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthService(UserRepository userRepository,
-            JwtService jwtService, AuthenticationManager authenticationManager) {
+                       JwtService jwtService,
+                       AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }
 
     public AuthResponse authenticate(LoginRequest request) {
+
+        // 1. Authentication of the credentials
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword()));
+                        request.getPassword()
+                )
+        );
 
-        // Find user by email
         User user = userRepository.findByEmail(request.getEmail());
         if (user == null) {
             throw new RuntimeException("User not found");
         }
 
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("role", user.getRole().name());
-        extraClaims.put("userId", user.getId());
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getId());
+        claims.put("role", user.getUserType().name());
+        claims.put("administratorId", user.getAdministratorId());
 
-        String jwtToken = jwtService.generateToken(extraClaims, user);
+
+        String jwtToken = jwtService.generateToken(claims, user);
+
 
         Integer companyId = user.getCompany() != null ? user.getCompany().getId() : null;
 
         return new AuthResponse(
                 user.getId(),
+                user.getAdministratorId(),
                 jwtToken,
                 user.getEmail(),
                 user.getName(),
-                user.getRole().name(),
-                companyId);
+                user.getUserType().name(),
+                companyId
+        );
     }
 }

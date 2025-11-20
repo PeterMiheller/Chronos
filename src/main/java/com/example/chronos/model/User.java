@@ -108,8 +108,9 @@ public class User implements UserDetails {
     // UserDetails implementation
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + userType.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.userType.name()));
     }
+
 
     @Override
     public String getUsername() {

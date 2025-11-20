@@ -1,8 +1,11 @@
 package com.example.chronos.controller;
 
+import com.example.chronos.DTO.VacationRequestDTO;
+import com.example.chronos.model.User;
 import com.example.chronos.model.VacationRequest;
 import com.example.chronos.service.VacationRequestService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,10 +31,15 @@ public class VacationRequestController {
         return request != null ? ResponseEntity.ok(request) : ResponseEntity.notFound().build();
     }
 
+//    @PostMapping
+//    public ResponseEntity<VacationRequest> create(@RequestBody VacationRequest request) {
+//        return ResponseEntity.ok(vacationRequestService.save(request));
+//    }
     @PostMapping
-    public ResponseEntity<VacationRequest> create(@RequestBody VacationRequest request) {
-        return ResponseEntity.ok(vacationRequestService.save(request));
-    }
+    public VacationRequest createRequest( @AuthenticationPrincipal User user, @RequestBody VacationRequestDTO dto) {
+    return vacationRequestService.create(user, dto);
+}
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
