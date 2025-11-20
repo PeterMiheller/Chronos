@@ -1,0 +1,39 @@
+package com.example.chronos.DTO;
+
+public class ClockOutResponse {
+    private Integer id;
+    private Integer employeeId;
+    private String clockInTime;
+    private String clockOutTime;
+    private String date;
+    private Float hoursWorked;
+
+    public ClockOutResponse() {}
+
+    public ClockOutResponse(Integer id, Integer employeeId, String clockInTime, String clockOutTime, String date, Float hoursWorked) {
+        this.id = id;
+        this.employeeId = employeeId;
+        this.clockInTime = clockInTime;
+        this.clockOutTime = clockOutTime;
+        this.date = date;
+        this.hoursWorked = hoursWorked;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public Integer getEmployeeId() { return employeeId; }
+    public void setEmployeeId(Integer employeeId) { this.employeeId = employeeId; }
+
+    public String getClockInTime() { return clockInTime; }
+    public void setClockInTime(String clockInTime) { this.clockInTime = clockInTime; }
+
+    public String getClockOutTime() { return clockOutTime; }
+    public void setClockOutTime(String clockOutTime) { this.clockOutTime = clockOutTime; }
+
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
+
+    public Float getHoursWorked() { return hoursWorked; }
+    public void setHoursWorked(Float hoursWorked) { this.hoursWorked = hoursWorked; }
+}
