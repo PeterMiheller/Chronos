@@ -44,6 +44,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/vacation-requests/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/timesheets/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/events/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        .requestMatchers("/api/vacation-requests/*/status").hasRole( "ADMINISTRATOR")
+                        .requestMatchers("/api/vacation-requests/*/status").hasAnyRole("ADMINISTRATOR", "SUPERADMIN")
+                        .requestMatchers("/api/vacation-requests/administrator").hasRole( "ADMINISTRATOR")
+                        .requestMatchers("/api/vacation-requests/**")
+                        .hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
