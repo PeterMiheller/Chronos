@@ -1,19 +1,23 @@
 package com.example.chronos.service;
 
+import com.example.chronos.model.User;
 import com.example.chronos.model.VacationRequest;
 import com.example.chronos.model.VacationStatus;
+import com.example.chronos.repository.UserRepository;
 import com.example.chronos.repository.VacationRequestRepository;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
-
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
 public class VacationRequestService {
     private final VacationRequestRepository vacationRequestRepository;
+    private final UserRepository userRepository;
 
-    public VacationRequestService(VacationRequestRepository vacationRequestRepository) {
+    public VacationRequestService(VacationRequestRepository vacationRequestRepository, UserRepository userRepository) {
         this.vacationRequestRepository = vacationRequestRepository;
+        this.userRepository = userRepository;
     }
 
     public VacationRequest save(VacationRequest request) {
@@ -40,13 +44,39 @@ public class VacationRequestService {
         return vacationRequestRepository.findByAdministratorId(administratorId);
     }
 
-    public VacationRequest updateVacationRequestStatus(int id, VacationStatus status) {
-        Optional<VacationRequest> optionalRequest = vacationRequestRepository.findById(id);
-        if (optionalRequest.isEmpty()) {
-            return null;
+    public VacationRequest updateVacationRequestStatus(int requestId, VacationStatus newStatus, int administratorId) {
+        VacationRequest request = vacationRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Vacation request not found with ID: " + requestId));
+
+        if (request.getAdministratorId() != administratorId) {
+            throw new SecurityException("User is not the assigned administrator for this request.");
         }
-        VacationRequest existingRequest = optionalRequest.get();
-        existingRequest.setStatus(status);
-        return vacationRequestRepository.save(existingRequest);
+
+        if (request.getStatus() != VacationStatus.SUBMITTED) {
+            throw new IllegalStateException("Request status must be SUBMITTED to be processed.");
+        }
+
+        if (newStatus == VacationStatus.APPROVED) {
+            User employee = userRepository.findById(request.getEmployeeId())
+                    .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+            long requestedDays = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
+            int days = (int) requestedDays;
+
+            if (employee.getVacationDaysRemaining() == null || employee.getVacationDaysRemaining() < days) {
+                throw new IllegalArgumentException("INSUFFICIENT_DAYS");
+            }
+
+            employee.setVacationDaysRemaining(employee.getVacationDaysRemaining() - days);
+            userRepository.save(employee);
+
+            request.setStatus(VacationStatus.APPROVED);
+        } else if (newStatus == VacationStatus.REJECTED) {
+            request.setStatus(VacationStatus.REJECTED);
+        } else {
+            throw new IllegalArgumentException("Invalid status update. Only APPROVED or REJECTED is allowed.");
+        }
+
+        return vacationRequestRepository.save(request);
     }
 }

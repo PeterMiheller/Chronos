@@ -1,17 +1,15 @@
 package com.example.chronos.DTO;
 
-import com.example.chronos.model.VacationStatus;
-
 public class VacationStatusUpdateRequest {
-    private VacationStatus status;
+    private String status;
 
-    public VacationStatusUpdateRequest() {
-    }
-    public VacationStatus getStatus() {
+    public VacationStatusUpdateRequest() {}
+
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(VacationStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 }
