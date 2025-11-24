@@ -16,4 +16,6 @@ public interface TimesheetEntryRepository extends JpaRepository<TimesheetEntry, 
             @Param("end") LocalDate end);
 
     Optional<TimesheetEntry> findByUserIdAndDate(int userId, LocalDate date);
+    
+    Optional<TimesheetEntry> findByUser_IdAndDate(int userId, LocalDate date);
 }

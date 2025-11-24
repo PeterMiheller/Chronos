@@ -8,6 +8,7 @@ public class AuthResponse {
     private String role;
     private Integer companyId;
     private Integer administratorId;
+    private Long expiresAt; // Timestamp when token expires
 
     public AuthResponse() {
     }
@@ -35,6 +36,16 @@ public class AuthResponse {
         this.name = name;
         this.role = role;
         this.companyId = companyId;
+    }
+
+    public AuthResponse(Integer id, String token, String email, String name, String role, Integer companyId, Long expiresAt) {
+        this.id = id;
+        this.token = token;
+        this.email = email;
+        this.name = name;
+        this.role = role;
+        this.companyId = companyId;
+        this.expiresAt = expiresAt;
     }
 
 
@@ -74,6 +85,14 @@ public class AuthResponse {
         return role;
     }
 
+
+    public Long getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(Long expiresAt) {
+        this.expiresAt = expiresAt;
+    }
     public void setRole(String role) {
         this.role = role;
     }

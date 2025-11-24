@@ -1,24 +1,21 @@
 package com.example.chronos.service;
 
-import com.example.chronos.model.VacationRequest;
 import com.example.chronos.model.User;
-import com.example.chronos.DTO.VacationRequestDTO;
+import com.example.chronos.model.VacationRequest;
 import com.example.chronos.model.VacationStatus;
 import com.example.chronos.repository.UserRepository;
 import com.example.chronos.repository.VacationRequestRepository;
 import org.springframework.stereotype.Service;
-
-import java.time.DayOfWeek;
-import java.time.LocalDate;
+import java.util.Optional;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-
 
 @Service
 public class VacationRequestService {
     private final VacationRequestRepository vacationRequestRepository;
     private final UserRepository userRepository;
 
-    public VacationRequestService(VacationRequestRepository vacationRequestRepository,UserRepository userRepository) {
+    public VacationRequestService(VacationRequestRepository vacationRequestRepository, UserRepository userRepository) {
         this.vacationRequestRepository = vacationRequestRepository;
         this.userRepository = userRepository;
     }
@@ -26,7 +23,6 @@ public class VacationRequestService {
     public VacationRequest save(VacationRequest request) {
         return vacationRequestRepository.save(request);
     }
-
 
     public List<VacationRequest> findAll() {
         return vacationRequestRepository.findAll();
@@ -48,55 +44,39 @@ public class VacationRequestService {
         return vacationRequestRepository.findByAdministratorId(administratorId);
     }
 
-    public VacationRequest create(User user, VacationRequestDTO dto) {
+    public VacationRequest updateVacationRequestStatus(int requestId, VacationStatus newStatus, int administratorId) {
+        VacationRequest request = vacationRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Vacation request not found with ID: " + requestId));
 
-        if (dto.getStartDate().isAfter(dto.getEndDate())) {
-            throw new RuntimeException("Start date cannot be after end date");
+        if (request.getAdministratorId() != administratorId) {
+            throw new SecurityException("User is not the assigned administrator for this request.");
         }
 
-        long workingDays = calculateWorkingDays(dto.getStartDate(), dto.getEndDate());
-        if (workingDays < 1) {
-            throw new RuntimeException("Vacation request must include at least 1 working day.");
+        if (request.getStatus() != VacationStatus.SUBMITTED) {
+            throw new IllegalStateException("Request status must be SUBMITTED to be processed.");
         }
 
-        if (vacationRequestRepository.existsOverlap(
-                user.getId(),
-                dto.getStartDate(),
-                dto.getEndDate()
-        )) {
-            throw new RuntimeException("Vacation dates overlap with an existing request.");
-        }
+        if (newStatus == VacationStatus.APPROVED) {
+            User employee = userRepository.findById(request.getEmployeeId())
+                    .orElseThrow(() -> new RuntimeException("Employee not found"));
 
+            long requestedDays = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
+            int days = (int) requestedDays;
 
-        VacationRequest req = new VacationRequest();
-        req.setEmployeeId(user.getId());
-        req.setAdministratorId(user.getAdministratorId());
-        req.setStartDate(dto.getStartDate());
-        req.setEndDate(dto.getEndDate());
-        req.setStatus(VacationStatus.PENDING);
-        req.setPdfPath(null);
-
-        return vacationRequestRepository.save(req);
-    }
-
-    private long calculateWorkingDays(LocalDate start, LocalDate end) {
-        long count = 0;
-        LocalDate current = start;
-
-        while (!current.isAfter(end)) {
-            DayOfWeek day = current.getDayOfWeek();
-            if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
-                count++;
+            if (employee.getVacationDaysRemaining() == null || employee.getVacationDaysRemaining() < days) {
+                throw new IllegalArgumentException("INSUFFICIENT_DAYS");
             }
-            current = current.plusDays(1);
+
+            employee.setVacationDaysRemaining(employee.getVacationDaysRemaining() - days);
+            userRepository.save(employee);
+
+            request.setStatus(VacationStatus.APPROVED);
+        } else if (newStatus == VacationStatus.REJECTED) {
+            request.setStatus(VacationStatus.REJECTED);
+        } else {
+            throw new IllegalArgumentException("Invalid status update. Only APPROVED or REJECTED is allowed.");
         }
 
-        return count;
+        return vacationRequestRepository.save(request);
     }
-
-
-
-
-
-
 }
