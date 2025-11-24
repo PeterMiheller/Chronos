@@ -26,5 +26,13 @@ public interface VacationRequestRepository extends JpaRepository<VacationRequest
             @Param("endDate") LocalDate endDate
     );
 
+    @Query("SELECT vr FROM VacationRequest vr " +
+            "WHERE vr.employeeId = :employeeId " +
+            "AND vr.status <> 'REJECTED' " +
+            "AND vr.startDate <= :endDate " +
+            "AND vr.endDate >= :startDate")
+    List<VacationRequest> findOverlappingRequests(int employeeId, LocalDate startDate, LocalDate endDate);
+
+
 
 }

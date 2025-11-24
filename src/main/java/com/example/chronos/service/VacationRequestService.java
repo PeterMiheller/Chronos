@@ -94,6 +94,17 @@ public class VacationRequestService {
             throw new IllegalArgumentException("End date cannot be before start date.");
         }
 
+        List<VacationRequest> overlapping =
+                vacationRequestRepository.findOverlappingRequests(
+                        user.getId(),
+                        dto.getStartDate(),
+                        dto.getEndDate()
+                );
+
+        if (!overlapping.isEmpty()) {
+            throw new IllegalArgumentException("You already have a vacation request in this interval.");
+        }
+
         VacationRequest request = new VacationRequest();
         request.setEmployeeId(user.getId());
         request.setAdministratorId(dto.getAdministratorId());
