@@ -23,7 +23,8 @@ public class AuthService {
     private long jwtExpiration;
 
     public AuthService(UserRepository userRepository,
-            JwtService jwtService, AuthenticationManager authenticationManager) {
+                       JwtService jwtService,
+                       AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -41,11 +42,14 @@ public class AuthService {
             throw new RuntimeException("User not found");
         }
 
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("role", user.getRole().name());
-        extraClaims.put("userId", user.getId());
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getId());
+        claims.put("role", user.getUserType().name());
+        claims.put("administratorId", user.getAdministratorId());
 
-        String jwtToken = jwtService.generateToken(extraClaims, user);
+
+        String jwtToken = jwtService.generateToken(claims, user);
+
 
         // Calculate expiration timestamp
         Long expiresAt = System.currentTimeMillis() + jwtExpiration;

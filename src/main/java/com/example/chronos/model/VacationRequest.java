@@ -36,7 +36,7 @@ public class VacationRequest {
         this.administratorId = administratorId;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.status = VacationStatus.CREATED;
+        this.status = VacationStatus.PENDING;
     }
 
     // Getters and Setters

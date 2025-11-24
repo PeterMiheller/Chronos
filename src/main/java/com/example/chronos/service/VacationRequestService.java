@@ -1,5 +1,6 @@
 package com.example.chronos.service;
 
+import com.example.chronos.DTO.VacationRequestDTO;
 import com.example.chronos.model.User;
 import com.example.chronos.model.VacationRequest;
 import com.example.chronos.model.VacationStatus;
@@ -14,10 +15,12 @@ import java.util.List;
 public class VacationRequestService {
     private final VacationRequestRepository vacationRequestRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
-    public VacationRequestService(VacationRequestRepository vacationRequestRepository, UserRepository userRepository) {
+    public VacationRequestService(VacationRequestRepository vacationRequestRepository, UserRepository userRepository, UserService userService) {
         this.vacationRequestRepository = vacationRequestRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public VacationRequest save(VacationRequest request) {
@@ -52,7 +55,7 @@ public class VacationRequestService {
             throw new SecurityException("User is not the assigned administrator for this request.");
         }
 
-        if (request.getStatus() != VacationStatus.SUBMITTED) {
+        if (request.getStatus() != VacationStatus.PENDING) {
             throw new IllegalStateException("Request status must be SUBMITTED to be processed.");
         }
 
@@ -78,5 +81,41 @@ public class VacationRequestService {
         }
 
         return vacationRequestRepository.save(request);
+    }
+
+
+    public VacationRequest create(User user, VacationRequestDTO dto) {
+
+        if (dto.getStartDate() == null || dto.getEndDate() == null) {
+            throw new IllegalArgumentException("Start and end dates are required.");
+        }
+
+        if (dto.getEndDate().isBefore(dto.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date.");
+        }
+
+        List<VacationRequest> overlapping =
+                vacationRequestRepository.findOverlappingRequests(
+                        user.getId(),
+                        dto.getStartDate(),
+                        dto.getEndDate()
+                );
+
+        if (!overlapping.isEmpty()) {
+            throw new IllegalArgumentException("You already have a vacation request in this interval.");
+        }
+
+        VacationRequest request = new VacationRequest();
+        request.setEmployeeId(user.getId());
+        request.setAdministratorId(dto.getAdministratorId());
+        request.setStartDate(dto.getStartDate());
+        request.setEndDate(dto.getEndDate());
+        request.setStatus(VacationStatus.PENDING);
+
+        return vacationRequestRepository.save(request);
+    }
+
+    public Integer getAdminIdByEmployeeId(int employeeId) {
+        return userService.getAdminId(employeeId);
     }
 }

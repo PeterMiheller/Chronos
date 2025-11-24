@@ -1,5 +1,7 @@
 package com.example.chronos.controller;
 
+import com.example.chronos.DTO.VacationRequestDTO;
+import com.example.chronos.model.User;
 import com.example.chronos.model.VacationRequest;
 import com.example.chronos.model.User; // Required Import
 import com.example.chronos.model.VacationStatus; // Required Import for the Enum
@@ -10,6 +12,7 @@ import org.springframework.http.HttpHeaders; // Required Import for custom heade
 import org.springframework.http.HttpStatus; // Required Import for HTTP status codes
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication; // Required Import for JWT/User context
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,9 +41,10 @@ public class VacationRequestController {
     }
 
     @PostMapping
-    public ResponseEntity<VacationRequest> create(@RequestBody VacationRequest request) {
-        return ResponseEntity.ok(vacationRequestService.save(request));
-    }
+    public VacationRequest createRequest(@AuthenticationPrincipal User user, @RequestBody VacationRequestDTO dto) {
+    return vacationRequestService.create(user, dto);
+}
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
@@ -51,6 +55,11 @@ public class VacationRequestController {
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<List<VacationRequest>> getVacationRequestsByEmployee(@PathVariable int employeeId) {
         return ResponseEntity.ok(vacationRequestService.findByEmployeeId(employeeId));
+    }
+
+    @GetMapping("/employee/adminId/{employeeId}")
+    public ResponseEntity<Integer> getAdminIdByEmployeeId(@PathVariable int employeeId) {
+        return ResponseEntity.ok(vacationRequestService.getAdminIdByEmployeeId(employeeId));
     }
 
     /**
