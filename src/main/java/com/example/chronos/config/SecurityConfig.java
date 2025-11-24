@@ -34,21 +34,27 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/auth/**").permitAll()
-                        // More specific routes first
+                        
+                        // --- SPECIFIC ROUTES FIRST ---
+                        
+                        // Users
                         .requestMatchers("/api/users/{id}/dashboard-summary").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/users/email/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/users/{id}").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
-                        // Generic routes after specific ones
+                        
+                        // Vacation Requests (Specific)
+                        .requestMatchers("/api/vacation-requests/administrator/{id}").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
+                        .requestMatchers("/api/vacation-requests/employee/{id}").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        .requestMatchers("/api/vacation-requests/{requestId}/status").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
+                        
+                        // --- GENERIC ROUTES LAST ---
+                        
                         .requestMatchers("/api/users/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
                         .requestMatchers("/api/companies/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
                         .requestMatchers("/api/vacation-requests/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/timesheets/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/events/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
-                        .requestMatchers("/api/vacation-requests/*/status").hasRole( "ADMINISTRATOR")
-                        .requestMatchers("/api/vacation-requests/*/status").hasAnyRole("ADMINISTRATOR", "SUPERADMIN")
-                        .requestMatchers("/api/vacation-requests/administrator").hasRole( "ADMINISTRATOR")
-                        .requestMatchers("/api/vacation-requests/**")
-                        .hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
+                        
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
