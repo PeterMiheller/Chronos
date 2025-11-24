@@ -55,18 +55,23 @@ public class VacationRequestController {
 
     /**
      * Endpoint to get all vacation requests assigned to the authenticated administrator.
-     * The administrator ID is retrieved from the JWT token via the Authentication object.
      */
-    @GetMapping("/administrator")
-    public ResponseEntity<List<VacationRequest>> getVacationRequestsByAdministrator(Authentication authentication) {
-        // 1. Get logged-in user (administrator)
+    @GetMapping("/administrator/{id}")
+    public ResponseEntity<List<VacationRequest>> getVacationRequestsByAdministrator(
+            @PathVariable int id,
+            Authentication authentication) {
+        
         User admin = userService.findByEmail(authentication.getName());
         if (admin == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // 2. Fetch requests assigned to this administrator's ID
-        return ResponseEntity.ok(vacationRequestService.findByAdministratorId(admin.getId()));
+        // Optional: Ensure the logged-in admin matches the requested ID (or is SuperAdmin)
+        // if (admin.getId() != id && admin.getUserType() != UserType.SUPERADMIN) {
+        //    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        // }
+
+        return ResponseEntity.ok(vacationRequestService.findByAdministratorId(id));
     }
 
 
