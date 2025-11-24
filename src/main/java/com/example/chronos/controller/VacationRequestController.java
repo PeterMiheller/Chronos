@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders; // Required Import for custom heade
 import org.springframework.http.HttpStatus; // Required Import for HTTP status codes
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication; // Required Import for JWT/User context
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,7 +41,7 @@ public class VacationRequestController {
     }
 
     @PostMapping
-    public VacationRequest createRequest( @AuthenticationPrincipal User user, @RequestBody VacationRequestDTO dto) {
+    public VacationRequest createRequest(@AuthenticationPrincipal User user, @RequestBody VacationRequestDTO dto) {
     return vacationRequestService.create(user, dto);
 }
 
@@ -54,6 +55,11 @@ public class VacationRequestController {
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<List<VacationRequest>> getVacationRequestsByEmployee(@PathVariable int employeeId) {
         return ResponseEntity.ok(vacationRequestService.findByEmployeeId(employeeId));
+    }
+
+    @GetMapping("/employee/adminId/{employeeId}")
+    public ResponseEntity<Integer> getAdminIdByEmployeeId(@PathVariable int employeeId) {
+        return ResponseEntity.ok(vacationRequestService.getAdminIdByEmployeeId(employeeId));
     }
 
     /**

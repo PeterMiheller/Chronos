@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -117,5 +118,10 @@ public class UserService {
         admin.setCompany(null);  // Company will be set when the company is created
         admin.setUserType(UserType.ADMINISTRATOR);
         return userRepository.save(admin);
+    }
+
+    public Integer getAdminId(Integer employeeId) {
+        Optional<User> user = userRepository.findById(employeeId);
+        return user.get().getAdministratorId();
     }
 }
