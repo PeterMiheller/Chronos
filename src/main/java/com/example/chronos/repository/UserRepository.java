@@ -10,4 +10,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByUserType(UserType userType);
     List<User> findByCompanyId(int companyId);
     List<User> findByAdministratorId(int administratorId);
+    List<User> findByCompanyIdAndUserType(int companyId, UserType userType);
 }

@@ -1,8 +1,12 @@
 package com.example.chronos.service;
 
 import com.example.chronos.DTO.CreateAdminRequest;
+import com.example.chronos.DTO.CreateEmployeeRequest;
+import com.example.chronos.DTO.UpdateEmployeeRequest;
+import com.example.chronos.model.Company;
 import com.example.chronos.model.User;
 import com.example.chronos.model.UserType;
+import com.example.chronos.repository.CompanyRepository;
 import com.example.chronos.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,10 +17,12 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.companyRepository = companyRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -43,6 +49,11 @@ public class UserService {
     // Get all employees
     public List<User> findAllEmployees() {
         return userRepository.findByUserType(UserType.EMPLOYEE);
+    }
+
+    // Get employees by company ID
+    public List<User> findEmployeesByCompanyId(int companyId) {
+        return userRepository.findByCompanyIdAndUserType(companyId, UserType.EMPLOYEE);
     }
 
     // Get all administrators
@@ -123,5 +134,130 @@ public class UserService {
     public Integer getAdminId(Integer employeeId) {
         Optional<User> user = userRepository.findById(employeeId);
         return user.get().getAdministratorId();
+    }
+
+    public User createEmployee(User user) {
+        // Set default values for employee
+        user.setUserType(UserType.EMPLOYEE);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // Set default vacation days if not provided
+        if (user.getVacationDaysTotal() == null) {
+            user.setVacationDaysTotal(0);
+        }
+        if (user.getVacationDaysRemaining() == null) {
+            user.setVacationDaysRemaining(user.getVacationDaysTotal());
+        }
+
+        // Set default workload if not provided
+        if (user.getExpectedWorkload() == null) {
+            user.setExpectedWorkload(40.0f);
+        }
+
+        return userRepository.save(user);
+    }
+
+    public User createEmployee(CreateEmployeeRequest request) {
+        User employee = new User();
+        employee.setName(request.getName());
+        employee.setEmail(request.getEmail());
+        employee.setPassword(passwordEncoder.encode(request.getPassword()));
+        employee.setUserType(UserType.EMPLOYEE);
+
+        // Set company if provided
+        if (request.getCompanyId() != null) {
+            Company company = companyRepository.findById(request.getCompanyId()).orElse(null);
+            employee.setCompany(company);
+        }
+
+        // Set administrator if provided
+        employee.setAdministratorId(request.getAdministratorId());
+
+        // Set vacation days
+        employee.setVacationDaysTotal(request.getVacationDaysTotal() != null ? request.getVacationDaysTotal() : 0);
+        employee.setVacationDaysRemaining(employee.getVacationDaysTotal());
+
+        // Set workload
+        employee.setExpectedWorkload(request.getExpectedWorkload() != null ? request.getExpectedWorkload() : 40.0f);
+
+        return userRepository.save(employee);
+    }
+
+    public User updateEmployee(int id, User user) {
+        User existingEmployee = findById(id);
+        if (existingEmployee == null || existingEmployee.getUserType() != UserType.EMPLOYEE) {
+            return null;
+        }
+
+        // Update fields
+        if (user.getName() != null) {
+            existingEmployee.setName(user.getName());
+        }
+        if (user.getEmail() != null) {
+            existingEmployee.setEmail(user.getEmail());
+        }
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            existingEmployee.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+        if (user.getVacationDaysTotal() != null) {
+            existingEmployee.setVacationDaysTotal(user.getVacationDaysTotal());
+        }
+        if (user.getVacationDaysRemaining() != null) {
+            existingEmployee.setVacationDaysRemaining(user.getVacationDaysRemaining());
+        }
+        if (user.getExpectedWorkload() != null) {
+            existingEmployee.setExpectedWorkload(user.getExpectedWorkload());
+        }
+        if (user.getAdministratorId() != null) {
+            existingEmployee.setAdministratorId(user.getAdministratorId());
+        }
+        if (user.getCompany() != null) {
+            existingEmployee.setCompany(user.getCompany());
+        }
+
+        return userRepository.save(existingEmployee);
+    }
+
+    public User updateEmployee(int id, UpdateEmployeeRequest request) {
+        User existingEmployee = findById(id);
+        if (existingEmployee == null || existingEmployee.getUserType() != UserType.EMPLOYEE) {
+            return null;
+        }
+
+        // Update fields only if provided
+        if (request.getName() != null) {
+            existingEmployee.setName(request.getName());
+        }
+        if (request.getEmail() != null) {
+            existingEmployee.setEmail(request.getEmail());
+        }
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            existingEmployee.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (request.getCompanyId() != null) {
+            Company company = companyRepository.findById(request.getCompanyId()).orElse(null);
+            existingEmployee.setCompany(company);
+        }
+        if (request.getAdministratorId() != null) {
+            existingEmployee.setAdministratorId(request.getAdministratorId());
+        }
+        if (request.getVacationDaysTotal() != null) {
+            existingEmployee.setVacationDaysTotal(request.getVacationDaysTotal());
+        }
+        if (request.getVacationDaysRemaining() != null) {
+            existingEmployee.setVacationDaysRemaining(request.getVacationDaysRemaining());
+        }
+        if (request.getExpectedWorkload() != null) {
+            existingEmployee.setExpectedWorkload(request.getExpectedWorkload());
+        }
+
+        return userRepository.save(existingEmployee);
+    }
+
+    public void deleteEmployee(int id) {
+        User employee = findById(id);
+        if (employee != null && employee.getUserType() == UserType.EMPLOYEE) {
+            userRepository.deleteById(id);
+        }
     }
 }
