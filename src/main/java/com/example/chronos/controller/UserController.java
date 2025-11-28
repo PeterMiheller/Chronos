@@ -1,6 +1,8 @@
 package com.example.chronos.controller;
 
 import com.example.chronos.DTO.CreateAdminRequest;
+import com.example.chronos.DTO.CreateEmployeeRequest;
+import com.example.chronos.DTO.UpdateEmployeeRequest;
 import com.example.chronos.DTO.DashboardSummaryResponse;
 import com.example.chronos.model.User;
 import com.example.chronos.model.UserType;
@@ -41,6 +43,67 @@ public class UserController {
     @GetMapping("/employees")
     public ResponseEntity<List<User>> getAllEmployees() {
         return ResponseEntity.ok(userService.findAllEmployees());
+    }
+
+    @GetMapping("/employee/{companyId}")
+    public ResponseEntity<List<User>> getEmployeesByCompanyId(@PathVariable int companyId) {
+        return ResponseEntity.ok(userService.findEmployeesByCompanyId(companyId));
+    }
+
+    @PostMapping("/employee/create")
+    public ResponseEntity<?> createEmployee(@RequestBody CreateEmployeeRequest request) {
+        try {
+            // Check if email already exists
+            User existingUser = userService.findByEmail(request.getEmail());
+            if (existingUser != null) {
+                return ResponseEntity.badRequest().body(new HashMap<String, String>() {{
+                    put("error", "Email already exists");
+                    put("email", request.getEmail());
+                }});
+            }
+
+            User savedUser = userService.createEmployee(request);
+            return ResponseEntity.ok(savedUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new HashMap<String, String>() {{
+                put("error", e.getMessage());
+            }});
+        }
+    }
+
+    @PutMapping("/employee/update/{id}")
+    public ResponseEntity<?> updateEmployee(@PathVariable int id, @RequestBody UpdateEmployeeRequest request) {
+        try {
+            // Check if employee exists
+            User existingEmployee = userService.findById(id);
+            if (existingEmployee == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Check if email is being changed to one that already exists
+            if (request.getEmail() != null && !request.getEmail().equals(existingEmployee.getEmail())) {
+                User userWithEmail = userService.findByEmail(request.getEmail());
+                if (userWithEmail != null) {
+                    return ResponseEntity.badRequest().body(new HashMap<String, String>() {{
+                        put("error", "Email already exists");
+                        put("email", request.getEmail());
+                    }});
+                }
+            }
+
+            User updatedUser = userService.updateEmployee(id, request);
+            return updatedUser != null ? ResponseEntity.ok(updatedUser) : ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new HashMap<String, String>() {{
+                put("error", e.getMessage());
+            }});
+        }
+    }
+
+    @DeleteMapping("/employee/delete/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable int id) {
+        userService.deleteEmployee(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/administrators")
