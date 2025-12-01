@@ -105,9 +105,30 @@ public class VacationRequestService {
             throw new IllegalArgumentException("You already have a vacation request in this interval.");
         }
 
+        // Determine the administrator ID based on user type
+        Integer administratorId;
+
+        // If the user is an EMPLOYEE, use their assigned administrator
+        if (user.getUserType() == com.example.chronos.model.UserType.EMPLOYEE) {
+            administratorId = user.getAdministratorId();
+            if (administratorId == null) {
+                throw new IllegalArgumentException("Employee does not have an assigned administrator.");
+            }
+        }
+        // If the user is ADMINISTRATOR, they approve their own request
+        else if (user.getUserType() == com.example.chronos.model.UserType.ADMINISTRATOR) {
+            administratorId = user.getId(); // Self-approval for administrators
+        }
+        // SUPERADMIN cannot create vacation requests
+        else if (user.getUserType() == com.example.chronos.model.UserType.SUPERADMIN) {
+            throw new IllegalArgumentException("SUPERADMIN users cannot create vacation requests.");
+        } else {
+            throw new IllegalArgumentException("Invalid user type for vacation request.");
+        }
+
         VacationRequest request = new VacationRequest();
         request.setEmployeeId(user.getId());
-        request.setAdministratorId(dto.getAdministratorId());
+        request.setAdministratorId(administratorId);
         request.setStartDate(dto.getStartDate());
         request.setEndDate(dto.getEndDate());
         request.setStatus(VacationStatus.PENDING);
