@@ -41,9 +41,20 @@ public class VacationRequestController {
     }
 
     @PostMapping
-    public VacationRequest createRequest(@AuthenticationPrincipal User user, @RequestBody VacationRequestDTO dto) {
-    return vacationRequestService.create(user, dto);
-}
+    public ResponseEntity<?> createRequest(@AuthenticationPrincipal User user, @RequestBody VacationRequestDTO dto) {
+        try {
+            VacationRequest request = vacationRequestService.create(user, dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(request);
+        } catch (IllegalArgumentException e) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("error-message", e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("error-message", "An unexpected error occurred: " + e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
     @DeleteMapping("/{id}")
@@ -69,7 +80,7 @@ public class VacationRequestController {
     public ResponseEntity<List<VacationRequest>> getVacationRequestsByAdministrator(
             @PathVariable int id,
             Authentication authentication) {
-        
+
         User admin = userService.findByEmail(authentication.getName());
         if (admin == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
