@@ -123,8 +123,8 @@ public class UserService {
         admin.setEmail(req.getEmail());
         admin.setPassword(passwordEncoder.encode(req.getPassword()));
         admin.setAdministratorId(null);
-        admin.setExpectedWorkload(0.0f);
-        admin.setVacationDaysTotal(0);
+        admin.setExpectedWorkload(40.0f);
+        admin.setVacationDaysTotal(25);
         admin.setVacationDaysRemaining(0);
         admin.setCompany(null);  // Company will be set when the company is created
         admin.setUserType(UserType.ADMINISTRATOR);
