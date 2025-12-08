@@ -46,7 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/vacation-requests/administrator/{id}").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
                         .requestMatchers("/api/vacation-requests/employee/{id}").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         .requestMatchers("/api/vacation-requests/{requestId}/status").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
-                        
+                        .requestMatchers("/api/vacation-requests/{id}/pdf").hasAnyRole("SUPERADMIN", "ADMINISTRATOR", "EMPLOYEE")
                         // --- GENERIC ROUTES LAST ---
                         
                         .requestMatchers("/api/users/**").hasAnyRole("SUPERADMIN", "ADMINISTRATOR")
