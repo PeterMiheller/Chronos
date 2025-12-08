@@ -10,6 +10,7 @@ import com.example.chronos.service.VacationRequestService;
 import com.example.chronos.DTO.VacationStatusUpdateRequest;
 import org.springframework.http.HttpHeaders; // Required Import for custom headers
 import org.springframework.http.HttpStatus; // Required Import for HTTP status codes
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication; // Required Import for JWT/User context
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -147,6 +148,37 @@ public class VacationRequestController {
             HttpHeaders headers = new HttpHeaders();
             headers.add("error-message", "An unexpected error occurred during processing.");
             return new ResponseEntity<>(null, headers, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> downloadPdf(@PathVariable int id, Authentication authentication) {
+        try {
+            VacationRequest request = vacationRequestService.findById(id);
+            if (request == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Security Check
+            User currentUser = userService.findByEmail(authentication.getName());
+            boolean isOwner = currentUser.getId() == request.getEmployeeId();
+            boolean isAdmin = currentUser.getId() == request.getAdministratorId();
+            boolean isSuperAdmin = currentUser.getUserType().name().equals("SUPERADMIN");
+
+            if (!isOwner && !isAdmin && !isSuperAdmin) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            byte[] pdfBytes = vacationRequestService.generatePdf(id);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "vacation_request_" + id + ".pdf");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

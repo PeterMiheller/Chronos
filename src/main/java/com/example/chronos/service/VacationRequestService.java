@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfWriter;
+import java.io.ByteArrayOutputStream;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class VacationRequestService {
@@ -138,5 +142,60 @@ public class VacationRequestService {
 
     public Integer getAdminIdByEmployeeId(int employeeId) {
         return userService.getAdminId(employeeId);
+    }
+
+    public byte[] generatePdf(int requestId) {
+        VacationRequest request = findById(requestId);
+        if (request == null) {
+            throw new RuntimeException("Vacation request not found");
+        }
+
+        User employee = userRepository.findById(request.getEmployeeId())
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        
+        User admin = userRepository.findById(request.getAdministratorId())
+                .orElseThrow(() -> new RuntimeException("Administrator not found"));
+
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Document document = new Document();
+            PdfWriter.getInstance(document, out);
+            document.open();
+
+            // Title
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
+            Paragraph title = new Paragraph("Vacation Request Details", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+            document.add(Chunk.NEWLINE);
+
+            // Details
+            Font contentFont = FontFactory.getFont(FontFactory.HELVETICA, 12);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            document.add(new Paragraph("Request ID: " + request.getId(), contentFont));
+            document.add(Chunk.NEWLINE);
+            
+            document.add(new Paragraph("Employee Name: " + employee.getName(), contentFont));
+            document.add(new Paragraph("Employee Email: " + employee.getEmail(), contentFont));
+            document.add(Chunk.NEWLINE);
+
+            document.add(new Paragraph("Start Date: " + request.getStartDate().format(formatter), contentFont));
+            document.add(new Paragraph("End Date: " + request.getEndDate().format(formatter), contentFont));
+            document.add(Chunk.NEWLINE);
+
+            document.add(new Paragraph("Status: " + request.getStatus(), contentFont));
+            document.add(Chunk.NEWLINE);
+
+            document.add(new Paragraph("Approved/Reviewed By: " + admin.getName(), contentFont));
+            document.add(new Paragraph("Administrator Email: " + admin.getEmail(), contentFont));
+
+            document.add(Chunk.NEWLINE);
+            document.add(new Paragraph("Generated on: " + java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 10)));
+
+            document.close();
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating PDF", e);
+        }
     }
 }
