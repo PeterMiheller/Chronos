@@ -6,8 +6,11 @@ import com.example.chronos.DTO.UpdateEmployeeRequest;
 import com.example.chronos.model.Company;
 import com.example.chronos.model.User;
 import com.example.chronos.model.UserType;
+import com.example.chronos.model.VacationRequest;
+import com.example.chronos.model.VacationStatus;
 import com.example.chronos.repository.CompanyRepository;
 import com.example.chronos.repository.UserRepository;
+import com.example.chronos.repository.VacationRequestRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +22,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VacationRequestRepository vacationRequestRepository;
 
     public UserService(UserRepository userRepository, CompanyRepository companyRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder, VacationRequestRepository vacationRequestRepository) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.passwordEncoder = passwordEncoder;
+        this.vacationRequestRepository = vacationRequestRepository;
     }
 
     public User save(User user) {
@@ -300,5 +305,12 @@ public class UserService {
         }
 
         return userRepository.save(existingAdmin);
+    }
+
+    public Integer getPendingVacationRequestsCount(int userId) {
+        List<VacationRequest> requests = vacationRequestRepository.findByEmployeeId(userId);
+        return (int) requests.stream()
+                .filter(req -> req.getStatus() == VacationStatus.PENDING)
+                .count();
     }
 }

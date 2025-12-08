@@ -233,7 +233,8 @@ public class UserController {
             DashboardSummaryResponse.WeeklyHoursSummary weeklySummary = new DashboardSummaryResponse.WeeklyHoursSummary(
                     hoursThisWeek, weeklyTarget);
 
-            Integer pendingRequests = 0;
+            // Fetch actual pending requests count for this user
+            Integer pendingRequests = userService.getPendingVacationRequestsCount(id);
 
             DashboardSummaryResponse response = new DashboardSummaryResponse(
                     user,
