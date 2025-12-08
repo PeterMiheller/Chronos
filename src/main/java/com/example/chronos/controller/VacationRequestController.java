@@ -25,7 +25,7 @@ public class VacationRequestController {
     private final VacationRequestService vacationRequestService;
     private final UserService userService;
 
-    public VacationRequestController(VacationRequestService vacationRequestService,  UserService userService) {
+    public VacationRequestController(VacationRequestService vacationRequestService, UserService userService) {
         this.vacationRequestService = vacationRequestService;
         this.userService = userService;
     }
@@ -49,14 +49,16 @@ public class VacationRequestController {
         } catch (IllegalArgumentException e) {
             HttpHeaders headers = new HttpHeaders();
             headers.add("error-message", e.getMessage());
+            // Return the error message directly in the response body for easier frontend
+            // handling
             return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             HttpHeaders headers = new HttpHeaders();
             headers.add("error-message", "An unexpected error occurred: " + e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("An unexpected error occurred: " + e.getMessage(), headers,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
@@ -75,7 +77,8 @@ public class VacationRequestController {
     }
 
     /**
-     * Endpoint to get all vacation requests assigned to the authenticated administrator.
+     * Endpoint to get all vacation requests assigned to the authenticated
+     * administrator.
      */
     @GetMapping("/administrator/{id}")
     public ResponseEntity<List<VacationRequest>> getVacationRequestsByAdministrator(
@@ -87,14 +90,14 @@ public class VacationRequestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // Optional: Ensure the logged-in admin matches the requested ID (or is SuperAdmin)
+        // Optional: Ensure the logged-in admin matches the requested ID (or is
+        // SuperAdmin)
         // if (admin.getId() != id && admin.getUserType() != UserType.SUPERADMIN) {
-        //    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        // return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         // }
 
         return ResponseEntity.ok(vacationRequestService.findByAdministratorId(id));
     }
-
 
     /**
      * Endpoint to approve or reject a SUBMITTED vacation request.

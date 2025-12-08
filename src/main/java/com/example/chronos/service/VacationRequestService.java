@@ -21,7 +21,8 @@ public class VacationRequestService {
     private final UserRepository userRepository;
     private final UserService userService;
 
-    public VacationRequestService(VacationRequestRepository vacationRequestRepository, UserRepository userRepository, UserService userService) {
+    public VacationRequestService(VacationRequestRepository vacationRequestRepository, UserRepository userRepository,
+            UserService userService) {
         this.vacationRequestRepository = vacationRequestRepository;
         this.userRepository = userRepository;
         this.userService = userService;
@@ -87,7 +88,6 @@ public class VacationRequestService {
         return vacationRequestRepository.save(request);
     }
 
-
     public VacationRequest create(User user, VacationRequestDTO dto) {
 
         if (dto.getStartDate() == null || dto.getEndDate() == null) {
@@ -98,12 +98,21 @@ public class VacationRequestService {
             throw new IllegalArgumentException("End date cannot be before start date.");
         }
 
-        List<VacationRequest> overlapping =
-                vacationRequestRepository.findOverlappingRequests(
-                        user.getId(),
-                        dto.getStartDate(),
-                        dto.getEndDate()
-                );
+        // Calculate requested vacation days (working days only)
+        long requestedDays = ChronoUnit.DAYS.between(dto.getStartDate(), dto.getEndDate()) + 1;
+
+        // Check if user has enough vacation days remaining
+        Integer remainingDays = user.getVacationDaysRemaining();
+        if (remainingDays == null || remainingDays < requestedDays) {
+            throw new IllegalArgumentException("Insufficient vacation days. You have " +
+                    (remainingDays != null ? remainingDays : 0) +
+                    " days remaining, but requested " + requestedDays + " days.");
+        }
+
+        List<VacationRequest> overlapping = vacationRequestRepository.findOverlappingRequests(
+                user.getId(),
+                dto.getStartDate(),
+                dto.getEndDate());
 
         if (!overlapping.isEmpty()) {
             throw new IllegalArgumentException("You already have a vacation request in this interval.");
@@ -152,7 +161,7 @@ public class VacationRequestService {
 
         User employee = userRepository.findById(request.getEmployeeId())
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
-        
+
         User admin = userRepository.findById(request.getAdministratorId())
                 .orElseThrow(() -> new RuntimeException("Administrator not found"));
 
@@ -174,7 +183,7 @@ public class VacationRequestService {
 
             document.add(new Paragraph("Request ID: " + request.getId(), contentFont));
             document.add(Chunk.NEWLINE);
-            
+
             document.add(new Paragraph("Employee Name: " + employee.getName(), contentFont));
             document.add(new Paragraph("Employee Email: " + employee.getEmail(), contentFont));
             document.add(Chunk.NEWLINE);
@@ -190,7 +199,10 @@ public class VacationRequestService {
             document.add(new Paragraph("Administrator Email: " + admin.getEmail(), contentFont));
 
             document.add(Chunk.NEWLINE);
-            document.add(new Paragraph("Generated on: " + java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 10)));
+            document.add(new Paragraph(
+                    "Generated on: "
+                            + java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                    FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 10)));
 
             document.close();
             return out.toByteArray();
