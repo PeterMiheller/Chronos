@@ -15,8 +15,8 @@ public class DataInitializer {
 
     @Bean
     CommandLineRunner initDatabase(UserRepository userRepository,
-                                   CompanyRepository companyRepository,
-                                   PasswordEncoder passwordEncoder) {
+            CompanyRepository companyRepository,
+            PasswordEncoder passwordEncoder) {
         return args -> {
             if (userRepository.count() > 0) {
                 System.out.println("Database already initialized. Skipping data initialization.");
@@ -44,6 +44,9 @@ public class DataInitializer {
             admin.setName("Manager User");
             admin.setCompany(testCompany);
             admin.setUserType(UserType.ADMINISTRATOR);
+            admin.setVacationDaysTotal(25);
+            admin.setVacationDaysRemaining(25);
+            admin.setExpectedWorkload(40.0f);
             admin = userRepository.save(admin); // MUST be saved
             System.out.println("Created ADMIN user: manager@test.com / manager123");
 

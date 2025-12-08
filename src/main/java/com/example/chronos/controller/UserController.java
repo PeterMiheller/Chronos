@@ -56,18 +56,22 @@ public class UserController {
             // Check if email already exists
             User existingUser = userService.findByEmail(request.getEmail());
             if (existingUser != null) {
-                return ResponseEntity.badRequest().body(new HashMap<String, String>() {{
-                    put("error", "Email already exists");
-                    put("email", request.getEmail());
-                }});
+                return ResponseEntity.badRequest().body(new HashMap<String, String>() {
+                    {
+                        put("error", "Email already exists");
+                        put("email", request.getEmail());
+                    }
+                });
             }
 
             User savedUser = userService.createEmployee(request);
             return ResponseEntity.ok(savedUser);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new HashMap<String, String>() {{
-                put("error", e.getMessage());
-            }});
+            return ResponseEntity.badRequest().body(new HashMap<String, String>() {
+                {
+                    put("error", e.getMessage());
+                }
+            });
         }
     }
 
@@ -84,19 +88,23 @@ public class UserController {
             if (request.getEmail() != null && !request.getEmail().equals(existingEmployee.getEmail())) {
                 User userWithEmail = userService.findByEmail(request.getEmail());
                 if (userWithEmail != null) {
-                    return ResponseEntity.badRequest().body(new HashMap<String, String>() {{
-                        put("error", "Email already exists");
-                        put("email", request.getEmail());
-                    }});
+                    return ResponseEntity.badRequest().body(new HashMap<String, String>() {
+                        {
+                            put("error", "Email already exists");
+                            put("email", request.getEmail());
+                        }
+                    });
                 }
             }
 
             User updatedUser = userService.updateEmployee(id, request);
             return updatedUser != null ? ResponseEntity.ok(updatedUser) : ResponseEntity.notFound().build();
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new HashMap<String, String>() {{
-                put("error", e.getMessage());
-            }});
+            return ResponseEntity.badRequest().body(new HashMap<String, String>() {
+                {
+                    put("error", e.getMessage());
+                }
+            });
         }
     }
 
@@ -189,37 +197,41 @@ public class UserController {
 
             String currentUserEmail = authentication.getName();
             User currentUser = userService.findByEmail(currentUserEmail);
-            
+
             if (currentUser == null) {
-                return ResponseEntity.status(403).body(new HashMap<String, String>() {{
-                    put("error", "User not found");
-                }});
+                return ResponseEntity.status(403).body(new HashMap<String, String>() {
+                    {
+                        put("error", "User not found");
+                    }
+                });
             }
 
             // Allow if: user viewing own data, or user is ADMINISTRATOR/SUPERADMIN
             boolean isOwnData = currentUser.getId() == id;
-            boolean isAdmin = currentUser.getUserType() == UserType.ADMINISTRATOR || 
-                             currentUser.getUserType() == UserType.SUPERADMIN;
-            
+            boolean isAdmin = currentUser.getUserType() == UserType.ADMINISTRATOR ||
+                    currentUser.getUserType() == UserType.SUPERADMIN;
+
             if (!isOwnData && !isAdmin) {
-                return ResponseEntity.status(403).body(new HashMap<String, String>() {{
-                    put("error", "Access denied");
-                }});
+                return ResponseEntity.status(403).body(new HashMap<String, String>() {
+                    {
+                        put("error", "Access denied");
+                    }
+                });
             }
 
             Integer vacationTotal = user.getVacationDaysTotal() != null ? user.getVacationDaysTotal() : 0;
             Integer vacationRemaining = user.getVacationDaysRemaining() != null ? user.getVacationDaysRemaining() : 0;
             Integer vacationUsed = vacationTotal - vacationRemaining;
 
-            DashboardSummaryResponse.VacationDaysSummary vacationSummary = 
-                new DashboardSummaryResponse.VacationDaysSummary(vacationTotal, vacationUsed, vacationRemaining);
+            DashboardSummaryResponse.VacationDaysSummary vacationSummary = new DashboardSummaryResponse.VacationDaysSummary(
+                    vacationTotal, vacationUsed, vacationRemaining);
 
             Float expectedWorkload = user.getExpectedWorkload() != null ? user.getExpectedWorkload() : 40f;
             Float weeklyTarget = expectedWorkload;
             Float hoursThisWeek = 0f;
 
-            DashboardSummaryResponse.WeeklyHoursSummary weeklySummary = 
-                new DashboardSummaryResponse.WeeklyHoursSummary(hoursThisWeek, weeklyTarget);
+            DashboardSummaryResponse.WeeklyHoursSummary weeklySummary = new DashboardSummaryResponse.WeeklyHoursSummary(
+                    hoursThisWeek, weeklyTarget);
 
             Integer pendingRequests = 0;
 
@@ -227,14 +239,28 @@ public class UserController {
                     user,
                     vacationSummary,
                     weeklySummary,
-                    pendingRequests
-            );
+                    pendingRequests);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new HashMap<String, String>() {{
-                put("error", e.getMessage());
-            }});
+            return ResponseEntity.badRequest().body(new HashMap<String, String>() {
+                {
+                    put("error", e.getMessage());
+                }
+            });
         }
+    }
+
+    @GetMapping("/company/{companyId}/all-staff")
+    public ResponseEntity<List<User>> getAllStaffByCompany(@PathVariable int companyId) {
+        return ResponseEntity.ok(userService.findAllEmployeesAndAdministratorsByCompanyId(companyId));
+    }
+
+    @PutMapping("/administrator/update/{id}")
+    public ResponseEntity<User> updateAdministrator(
+            @PathVariable int id,
+            @RequestBody UpdateEmployeeRequest request) {
+        User updated = userService.updateAdministrator(id, request);
+        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 }

@@ -20,7 +20,8 @@ public class UserService {
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, CompanyRepository companyRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.passwordEncoder = passwordEncoder;
@@ -108,9 +109,9 @@ public class UserService {
     public User assignAdministratorToEmployee(int employeeId, int administratorId) {
         User employee = findById(employeeId);
         User admin = findById(administratorId);
-        if (employee != null && admin != null 
-            && employee.getUserType() == UserType.EMPLOYEE 
-            && admin.getUserType() == UserType.ADMINISTRATOR) {
+        if (employee != null && admin != null
+                && employee.getUserType() == UserType.EMPLOYEE
+                && admin.getUserType() == UserType.ADMINISTRATOR) {
             employee.setAdministratorId(administratorId);
             return userRepository.save(employee);
         }
@@ -125,8 +126,8 @@ public class UserService {
         admin.setAdministratorId(null);
         admin.setExpectedWorkload(40.0f);
         admin.setVacationDaysTotal(25);
-        admin.setVacationDaysRemaining(0);
-        admin.setCompany(null);  // Company will be set when the company is created
+        admin.setVacationDaysRemaining(25);
+        admin.setCompany(null); // Company will be set when the company is created
         admin.setUserType(UserType.ADMINISTRATOR);
         return userRepository.save(admin);
     }
@@ -259,5 +260,45 @@ public class UserService {
         if (employee != null && employee.getUserType() == UserType.EMPLOYEE) {
             userRepository.deleteById(id);
         }
+    }
+
+    public List<User> findAdministratorsByCompanyId(int companyId) {
+        return userRepository.findByCompanyIdAndUserType(companyId, UserType.ADMINISTRATOR);
+    }
+
+    public List<User> findAllEmployeesAndAdministratorsByCompanyId(int companyId) {
+        List<User> employees = userRepository.findByCompanyIdAndUserType(companyId, UserType.EMPLOYEE);
+        List<User> administrators = userRepository.findByCompanyIdAndUserType(companyId, UserType.ADMINISTRATOR);
+        employees.addAll(administrators);
+        return employees;
+    }
+
+    public User updateAdministrator(int id, UpdateEmployeeRequest request) {
+        User existingAdmin = findById(id);
+        if (existingAdmin == null || existingAdmin.getUserType() != UserType.ADMINISTRATOR) {
+            return null;
+        }
+
+        // Update fields only if provided
+        if (request.getName() != null) {
+            existingAdmin.setName(request.getName());
+        }
+        if (request.getEmail() != null) {
+            existingAdmin.setEmail(request.getEmail());
+        }
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            existingAdmin.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (request.getVacationDaysTotal() != null) {
+            existingAdmin.setVacationDaysTotal(request.getVacationDaysTotal());
+        }
+        if (request.getVacationDaysRemaining() != null) {
+            existingAdmin.setVacationDaysRemaining(request.getVacationDaysRemaining());
+        }
+        if (request.getExpectedWorkload() != null) {
+            existingAdmin.setExpectedWorkload(request.getExpectedWorkload());
+        }
+
+        return userRepository.save(existingAdmin);
     }
 }
